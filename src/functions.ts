@@ -6,6 +6,7 @@ import {
 } from './enums';
 import keys from 'all-object-keys';
 import jessy from 'jessy';
+import isolatedChecks from './isolated-checks';
 
 export let check = (...data) => {
   if (data.length === 1) {
@@ -61,8 +62,8 @@ let cacheGenerator = baseObj => {
   const allKeys: string[] = keys(baseObj);
   const entries: string[] = getEntries(baseObj, directKeys);
 
-  console.log(allKeys);
-  console.log(entries);
+  // console.log(allKeys);
+  // console.log(entries);
   return {
     allEssentialProperties: () => {
       let condition = true;
@@ -145,6 +146,35 @@ let cacheGenerator = baseObj => {
         }
       }
       return condition;
+    },
+    noMultiInMulti: () => {
+      let multiArray = allKeys.filter(
+        e => e.match(/\.([^\.]*)$/)[1] === 'multi' && jessy(e, baseObj)
+      );
+      for (const iterator of multiArray) {
+        let disected = iterator.split('.');
+        if (disected.length > 2) {
+          if (
+            jessy(disected.slice(0, disected.length - 3).join('.'), baseObj)[
+              'multi'
+            ]
+          ) {
+            return false;
+          }
+        }
+      }
+      return true;
+    },
+    noNestedInNested: () => {
+      for (const iterator of allKeys) {
+        if (iterator.split(/\.schema\b/).length > 2) return false;
+      }
+      return true;
+    },
+    isolated: () => {
+      // implement this
+      isolatedChecks(baseObj, directKeys, allKeys, entries);
+      return true;
     }
   };
 };

@@ -112,12 +112,16 @@ console.log('allEntriesAreObjects', check(_.allEntriesAreObjects));
 console.log('baseObjectHasChildren', check(_.baseObjectHasChildren));
 console.log('allPropertyNamesAreValid', check(_.allPropertyNamesAreValid)); // allTypesAreCorrect
 console.log('allTypesAreCorrect', check(_.allTypesAreCorrect));
+console.log('noMultiInMulti', check(_.noMultiInMulti));
+console.log('noNestedInNested', check(_.noNestedInNested));
+console.log('isolated', check(_.isolated));
+// console.log('allPropertyNamesAreValid', check(_.allPropertyNamesAreValid));
 // console.log('allPropertyNamesAreValid', check(_.allPropertyNamesAreValid));
 // console.log('allPropertyNamesAreValid', check(_.allPropertyNamesAreValid));
 // console.log(jessy('images',example));
 
-let a = 'about.schema.about_url.key';
-// let b = a.match(/\.[^\.]*$/);
-// let b = a.split(/\.schema\b/);
-let b = a.split('.');
+let a = 'about.schema.about_url.dsfsd';
+// let b = a.match(/\.([^\.]*)$/);
+let b = a.split(/\.schema\b/);
+// let b = a.split('.');
 console.log(b);
