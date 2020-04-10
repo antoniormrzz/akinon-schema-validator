@@ -20,9 +20,10 @@ let choicesDictatesDropdown = (payload: choicesPayload) => {
 let hasOneOrMoreMembers = (payload: choicesPayload) => {
   if (payload.value.length > 1) {
     if (
-      payload.value.every(e => {
+      payload.value.every((e) => {
         return (
           typeof e === 'object' &&
+          !Array.isArray(e) &&
           'value' in e &&
           'label' in e &&
           Object.keys(e).length === 2

@@ -7,4 +7,13 @@ export class CheckError extends Error {
   ) {
     super(message);
   }
+
+  getDetails() {
+    return {
+      message: this.message,
+      jessyString: this.jessyString,
+      found: this.found,
+      expected: this.expected,
+    };
+  }
 }

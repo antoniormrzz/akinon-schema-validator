@@ -2,6 +2,7 @@ import { AcceptableValues } from '../enums';
 import { Payload } from '../types/payload';
 import { CheckError } from '../types/error';
 import pipe from '../utils/pipe';
+import { SpellCheckProvider } from '../services/spellcheck-provider';
 
 type data_typePayload = Payload<string>;
 
@@ -9,8 +10,22 @@ let checkValue = (payload: data_typePayload) => {
   if (AcceptableValues.data_type.includes(payload.value)) {
     return payload;
   } else {
+    let lookup = '';
+    if (typeof payload.value === 'string') {
+      let lookupResult = SpellCheckProvider.getDictionaries().data_type.lookup(
+        payload.value
+      );
+      if (
+        lookupResult.suggestions &&
+        lookupResult.suggestions.length > 0 &&
+        lookupResult.suggestions[0].found
+      ) {
+        lookup = ' did you mean "' + lookupResult.suggestions[0].word + '" ?';
+      }
+    }
+
     throw new CheckError(
-      'Unexpected data_type value!',
+      'Unexpected data_type value!' + lookup,
       payload.jessyString,
       payload.value,
       AcceptableValues.data_type

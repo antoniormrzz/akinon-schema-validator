@@ -1,12 +1,13 @@
 import {
   EssentialProperties,
-  AcceptableValues,
   AcceptableProperties,
-  AcceptableTypes
+  AcceptableTypes,
 } from './enums';
 import keys from 'all-object-keys';
 import jessy from 'jessy';
 import isolatedChecks from './isolated-checks';
+import { CheckError } from './types/error';
+import { SpellCheckProvider } from './services/spellcheck-provider';
 
 export let check = (...data) => {
   if (data.length === 1) {
@@ -35,10 +36,9 @@ let buildJessyString = (array: string[], index: number) => {
 let getEntries = (baseObj, directKeys) => {
   const entries = [...directKeys];
   const temp = [];
-  entries.forEach(e => {
-    if (baseObj[e].schema) {
-      // todo: try catch
-      Object.keys(baseObj[e].schema).forEach(el => {
+  entries.forEach((e) => {
+    if (baseObj[e].schema && typeCheck(baseObj[e].schema, 'object')) {
+      Object.keys(baseObj[e].schema).forEach((el) => {
         temp.push(e + '.schema.' + el);
       });
     }
@@ -46,137 +46,215 @@ let getEntries = (baseObj, directKeys) => {
   return [...entries, ...temp];
 };
 
-let hasEssentials = obj => {
-  let properties = Object.keys(obj);
+let hasEssentials = (obj) => {
   let condition = true;
-  EssentialProperties.forEach(element => {
-    if (!properties.includes(element)) {
-      condition = false;
-    }
-  });
-  return condition;
+  if (!typeCheck(obj, 'object')) {
+    return false;
+  } else {
+    let properties = Object.keys(obj);
+    EssentialProperties.forEach((element) => {
+      if (!properties.includes(element)) {
+        condition = false;
+      }
+    });
+    return condition;
+  }
 };
 
-let cacheGenerator = baseObj => {
+let MainCheckFactory = (baseObj) => {
   const directKeys = Object.keys(baseObj);
   const allKeys: string[] = keys(baseObj);
   const entries: string[] = getEntries(baseObj, directKeys);
 
-  // console.log(allKeys);
-  // console.log(entries);
   return {
-    allEssentialProperties: () => {
-      let condition = true;
-      for (const element of entries) {
-        if (!check(jessy(element, baseObj), hasEssentials)) condition = false;
-        if (!condition) break;
+    baseObjectHasChildren: () => {
+      if (directKeys.length > 0) {
+        return true;
+      } else {
+        throw new CheckError(
+          'Root object should have children!',
+          'Root Object',
+          '{}',
+          '{...}'
+        );
       }
-      return condition;
+    },
+    allEntriesAreObjects: () => {
+      for (const iterator of entries) {
+        let value = jessy(iterator, baseObj);
+        let result = typeCheck(value, 'object');
+        if (!result) {
+          throw new CheckError(
+            'All entries should be Objects!',
+            iterator,
+            typeof value === 'object' ? 'array' : typeof value,
+            '{...}'
+          );
+        }
+      }
+      return true;
+    },
+    allEssentialProperties: () => {
+      for (const element of entries) {
+        let value = jessy(element, baseObj);
+        if (!check(value, hasEssentials)) {
+          throw new CheckError(
+            'All entries should have data_type, key and label properties!',
+            element,
+            value,
+            '{data_type : ...., key : ..., label : ...}'
+          );
+        }
+      }
+      return true;
+    },
+    allPropertyNamesAreValid: () => {
+      for (const iterator of allKeys) {
+        let disected = iterator.split('.');
+        if (disected.length < 2) {
+          // this shouldn't ever execute, but we all know how shit is capable of hitting the fan all the time
+          throw new CheckError(
+            'Root object children should be Objects!',
+            iterator,
+            typeof jessy(iterator, baseObj),
+            '{...}'
+          );
+        } else {
+          for (let index = 1; index < disected.length; index += 2) {
+            if (!AcceptableProperties.includes(disected[index])) {
+              let lookup = '';
+              let lookupResult = SpellCheckProvider.getDictionaries().property.lookup(
+                disected[index]
+              );
+              if (
+                lookupResult.suggestions &&
+                lookupResult.suggestions.length > 0 &&
+                lookupResult.suggestions[0].found
+              ) {
+                lookup =
+                  ' did you mean "' + lookupResult.suggestions[0].word + '" ?';
+              }
+              throw new CheckError(
+                'Property name is invalid!' + lookup,
+                iterator,
+                disected[index],
+                AcceptableProperties
+              );
+            }
+          }
+        }
+      }
+      return true;
+    },
+    allTypesAreCorrect: () => {
+      for (const iterator of allKeys) {
+        let disected = iterator.split('.');
+        if (disected.length < 2) {
+          // this shouldn't ever execute, but we all know how shit is capable of hitting the fan all the time
+          throw new CheckError(
+            'Root object children should be Objects!',
+            iterator,
+            typeof jessy(iterator, baseObj),
+            '{...}'
+          );
+        } else {
+          for (let index = 1; index < disected.length; index += 2) {
+            let jessyString = buildJessyString(disected, index);
+            let value = jessy(jessyString, baseObj);
+            if (!typeCheck(value, AcceptableTypes[disected[index]])) {
+              throw new CheckError(
+                'Incorrect property type!',
+                jessyString,
+                Array.isArray(value) ? 'array' : typeof value,
+                AcceptableTypes[disected[index]]
+              );
+            }
+          }
+        }
+      }
+      return true;
     },
     keysEqualPropertyNames: () => {
-      let condition = true;
       for (const element of allKeys) {
         let regexResult = element.match(/([^\.]*)\.key/);
         if (regexResult) {
-          condition = regexResult[1] === jessy(element, baseObj);
-          if (!condition) break;
-        }
-      }
-      return condition;
-    },
-    valuesAreAcceptable: () => {
-      let condition = true;
-      for (const element of allKeys) {
-        let regexResult = element.match(/[^.]*$/);
-        if (
-          regexResult &&
-          Object.keys(AcceptableValues).includes(regexResult[0])
-        ) {
-          condition = AcceptableValues[regexResult[0]].includes(
-            jessy(element, baseObj)
-          );
-          if (!condition) break;
-        }
-      }
-      return condition;
-    },
-    allEntriesAreObjects: () => {
-      let condition = true;
-      for (const iterator of entries) {
-        condition =
-          typeof jessy(iterator, baseObj) === 'object'
-            ? !Array.isArray(jessy(iterator, baseObj))
-            : false;
-        if (!condition) break;
-      }
-      return condition;
-    },
-    baseObjectHasChildren: () => {
-      return directKeys.length > 0;
-    },
-    allPropertyNamesAreValid: () => {
-      let condition = true;
-      for (const iterator of allKeys) {
-        let disected = iterator.split('.');
-        if (disected.length < 2) {
-          return false;
-        } else {
-          for (let index = 1; index < disected.length; index += 2) {
-            condition = AcceptableProperties.includes(disected[index]);
-            if (!condition) return condition;
-          }
-        }
-      }
-      return condition;
-    },
-    allTypesAreCorrect: () => {
-      let condition = true;
-      for (const iterator of allKeys) {
-        let disected = iterator.split('.');
-        if (disected.length < 2) {
-          return false;
-        } else {
-          for (let index = 1; index < disected.length; index += 2) {
-            condition = typeCheck(
-              jessy(buildJessyString(disected, index), baseObj),
-              AcceptableTypes[disected[index]]
+          let value = jessy(element, baseObj);
+          if (!(regexResult[1] === value)) {
+            throw new CheckError(
+              'Keys should equal object names!',
+              element,
+              value,
+              regexResult[1]
             );
-            if (!condition) return condition;
           }
         }
       }
-      return condition;
+      return true;
+    },
+    // data_type and display values are acceptable
+    // these were implemented in isolated checks
+    // valuesAreAcceptable: () => {
+    //   for (const element of allKeys) {
+    //     let regexResult = element.match(/[^.]*$/);
+    //     if (regexResult && Object.keys(AcceptableValues).includes(regexResult[0])) {
+    //       let value = jessy(element, baseObj);
+    //       if (!AcceptableValues[regexResult[0]].includes(value)) {
+    //         throw new CheckError(
+    //           regexResult[0]+' value is not acceptable!',
+    //           element,
+    //           value,
+    //           AcceptableValues[regexResult[0]]
+    //         );
+    //       }
+    //     }
+    //   }
+    //   return true;
+    // },
+    noNestedInNested: () => {
+      for (const iterator of allKeys) {
+        if (iterator.split(/\.schema\b/).length > 2)  {
+          throw new CheckError(
+            'There can be only one level of nesting via Schema!',
+            iterator,
+            '{ schema: { ...: { schema: ... } } }',
+            'no nested objects in nested objects'
+          );
+        }
+      }
+      return true;
     },
     noMultiInMulti: () => {
       let multiArray = allKeys.filter(
-        e => e.match(/\.([^\.]*)$/)[1] === 'multi' && jessy(e, baseObj)
+        (e) => e.match(/\.([^\.]*)$/)[1] === 'multi' && jessy(e, baseObj)
       );
       for (const iterator of multiArray) {
         let disected = iterator.split('.');
         if (disected.length > 2) {
+          let jessyString =disected.slice(0, disected.length - 3).join('.');
           if (
-            jessy(disected.slice(0, disected.length - 3).join('.'), baseObj)[
+            jessy(jessyString, baseObj)[
               'multi'
             ]
           ) {
-            return false;
+            throw new CheckError(
+              'Multi objects can\'t have nested multi objects in them!',
+              jessyString,
+              '{ multi: true }',
+              'no nested multi in multi'
+            );
           }
         }
       }
       return true;
     },
-    noNestedInNested: () => {
-      for (const iterator of allKeys) {
-        if (iterator.split(/\.schema\b/).length > 2) return false;
-      }
-      return true;
-    },
     isolated: () => {
-      // implement this
-      isolatedChecks(baseObj, directKeys, allKeys, entries);
-      return true;
-    }
+      try {
+        isolatedChecks(baseObj, directKeys, allKeys, entries);
+      } catch (error) {
+        throw error;
+      }
+    },
   };
 };
 
-export default cacheGenerator;
+export default MainCheckFactory;

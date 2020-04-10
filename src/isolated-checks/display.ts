@@ -2,6 +2,7 @@ import { AcceptableValues } from '../enums';
 import { Payload } from '../types/payload';
 import { CheckError } from '../types/error';
 import pipe from '../utils/pipe';
+import { SpellCheckProvider } from '../services/spellcheck-provider';
 
 type displayPayload = Payload<string>;
 
@@ -9,8 +10,21 @@ let checkValue = (payload: displayPayload) => {
   if (AcceptableValues.display.includes(payload.value)) {
     return payload;
   } else {
+    let lookup = '';
+    if (typeof payload.value === 'string') {
+      let lookupResult = SpellCheckProvider.getDictionaries().display.lookup(
+        payload.value
+      );
+      if (
+        lookupResult.suggestions &&
+        lookupResult.suggestions.length > 0 &&
+        lookupResult.suggestions[0].found
+      ) {
+        lookup = ' did you mean "' + lookupResult.suggestions[0].word + '" ?';
+      }
+    }
     throw new CheckError(
-      'Unexpected display value!',
+      'Unexpected display value!' + lookup,
       payload.jessyString,
       payload.value,
       AcceptableValues.display

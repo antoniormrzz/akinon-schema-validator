@@ -11,7 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "all-object-keys": "^2.1.1",
-    "jessy": "^3.0.0"
+    "jessy": "^3.0.0",
+    "spelling": "^2.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.8.3",

@@ -1,9 +1,9 @@
-export let AcceptableValues = {
+export const AcceptableValues = {
   data_type: ['text', 'image', 'dropdown', 'area', 'nested'],
   display: ['html-editor', 'date_picker', 'color_picker']
 };
 
-export let AcceptableTypes = {
+export const AcceptableTypes = {
   data_type: 'string',
   key: 'string',
   label: 'string',
@@ -15,9 +15,9 @@ export let AcceptableTypes = {
   choices: 'array'
 };
 
-export let EssentialProperties = ['data_type', 'key', 'label'];
+export const EssentialProperties = ['data_type', 'key', 'label'];
 
-export let AcceptableProperties = [
+export const AcceptableProperties = [
   'data_type',
   'key',
   'label',

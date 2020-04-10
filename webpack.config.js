@@ -8,13 +8,11 @@ module.exports = {
     path: path.resolve(__dirname, './dist')
   },
   module: {
-    rules: [
-      {
-        test: /\.ts$/,
-        loader: 'babel-loader',
-        exclude: /node_modules/
-      }
-    ]
+    rules: [{
+      test: /\.ts$/,
+      loader: 'babel-loader',
+      exclude: /node_modules/
+    }]
   },
   resolve: {
     extensions: ['.ts']
@@ -25,5 +23,5 @@ module.exports = {
     })
   ],
   watch: true,
-  mode: 'none'
+  mode: 'development'
 };
