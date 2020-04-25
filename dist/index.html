@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Akinon Schema Validator</title>
+  <link rel="stylesheet" href="codemirror.css">
+  <link rel="stylesheet" href="tomorrow-night-eighties.css">
+  <script type="text/javascript" src="codemirror.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
+  <script src="javascript.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jshint/2.11.0/jshint.js">
+  </script>
+  <script src="bundle.js"></script>
+
+</head>
+
+<body>
+  <div id="codemirror">
+
+  </div>
+  <style>
+    .CodeMirror{
+      height: 80vh;
+      border-radius: 5px;
+    }
+
+    #codemirror {
+      border: 2px solid black;
+      border-radius: 5px;
+      width: 100%;
+      margin: 0;
+      max-height: 50vh;
+    }
+
+    .error-marker {
+      color: black;
+      width: 10px !important;
+      background-color: #ff0000;
+    }
+
+    .error-marker .error-message {
+      display: none;
+      position: absolute;
+      background-color: #ddd;
+      border: 1px solid #999;
+      padding: 6px;
+      width: 140px;
+      left: 15px;
+      top: -1em;
+    }
+
+    .error-marker:hover .error-message {
+      display: block;
+    }
+  </style>
+  <script type="module">
+
+    const linter = new Vue({
+      data: () => ({
+        value: '',
+        result: {}
+      }),
+      mounted: function () {
+        this._editor = new CodeMirror(this.$refs.codemirror, {
+          lineNumbers: true,
+          tabSize: 2,
+          value: this.value,
+          mode: "json",
+          theme: 'tomorrow-night-eighties',
+          gutters: ['error']
+        });
+
+        this._editor.on('changes', () => {
+          this.value = this._editor.getValue();
+
+          JSHINT(this.value);
+          const errors = Array.isArray(JSHINT.errors) ? JSHINT.errors : [];
+          this._editor.clearGutter('error');
+          if (errors.length > 0) {
+            for (const error of errors) {
+              this._editor.setGutterMarker(error.line - 1, 'error', makeMarker(error.reason));
+            }
+            this.result = '';
+          } else {
+            try {
+              this.result = '';
+              let validation = validator(JSON.parse(this.value));
+              if(validation.error){
+                let temp = validation.error.getDetails();
+                this.result = 'error: ' + temp.message + '\n' + 'where: '+ temp.jessyString + '\n' + 'found: ' + temp.found + '\n' + 'expected: ' + temp.expected  + '\n' ;
+              }
+              if(validation.success){
+                this.result += 'success!'+ '\n';
+              }
+              if(validation.warnings){
+                this.result += 'warnings: ' + JSON.stringify(validation.warnings) + '\n';
+              }
+            } catch (error) {
+            }
+            
+          }
+
+        });
+      },
+      template: `
+                <div>
+                  <div ref="codemirror"></div>
+                  <br/>
+                  <pre style="color:red;">{{ result }}</pre>
+                </div>
+              `
+    });
+
+    function makeMarker(msg) {
+      const marker = document.createElement('div');
+      marker.classList.add('error-marker');
+      marker.innerHTML = '&nbsp;';
+
+      const error = document.createElement('div');
+      error.innerHTML = msg;
+      error.classList.add('error-message');
+      marker.appendChild(error);
+
+      return marker;
+    }
+
+    linter.$mount('#codemirror');
+  </script>
+</body>
+
+</html>
