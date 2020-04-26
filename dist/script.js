@@ -4,7 +4,7 @@ const linter = new Vue({
     value: '',
     warnings: [],
     error: {},
-    status:''
+    status: ''
   }),
   mounted: function () {
     this._editor = new CodeMirror(this.$refs.codemirror, {
@@ -22,31 +22,33 @@ const linter = new Vue({
       this.warnings = [];
       this.value = this._editor.getValue();
 
-      JSHINT(this.value);
-      const errors = Array.isArray(JSHINT.errors) ? JSHINT.errors : [];
-      this._editor.clearGutter('error');
-      if (errors.length > 0) {
-        for (const error of errors) {
-          this._editor.setGutterMarker(error.line - 1, 'error', makeMarker(error.reason));
-        }
-        this.status = 'json syntax error, please check line ' + errors[0].line;
-      } else {
-        try {
-          let validation = validator(JSON.parse(this.value));
-          if (validation.error) {
-            this.error = validation.error.getDetails();
-            this.status = 'error :(';
+      if (this.value.trim().length > 0) {
+        JSHINT(this.value);
+        const errors = Array.isArray(JSHINT.errors) ? JSHINT.errors : [];
+        this._editor.clearGutter('error');
+        if (errors.length > 0) {
+          for (const error of errors) {
+            this._editor.setGutterMarker(error.line - 1, 'error', makeMarker(error.reason));
           }
-          if (validation.success) {
-            this.status = 'passed! :)';
+          this.status = 'json syntax error, please check line ' + errors[0].line;
+        } else {
+          try {
+            let validation = validator(JSON.parse(this.value));
+            if (validation.error) {
+              this.error = validation.error.getDetails();
+              this.status = 'error :(';
+            }
+            if (validation.success) {
+              this.status = 'passed! :)';
+            }
+            if (validation.warnings) {
+              this.warnings = validation.warnings;
+            }
+          } catch (error) {
+            this.status = 'fatal error, please contact antonio with your exact schema :)';
           }
-          if (validation.warnings) {
-            this.warnings = validation.warnings;
-          }
-        } catch (error) {
-          this.status = 'fatal error, please contact antonio with your exact schema :)';
-        }
 
+        }
       }
 
     });
