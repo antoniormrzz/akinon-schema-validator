@@ -40,8 +40,9 @@ body {
 }
 
 .title__image img {
-  max-width: 50px;
-  max-height: 50px;
+  max-width: 100px;
+  max-height: 100px;
+  margin: -10px;
 }
 
 .title__by {
