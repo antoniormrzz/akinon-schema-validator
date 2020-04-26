@@ -1,0 +1,124 @@
+body {
+  background-color: rgb(25, 27, 52);
+}
+
+.github {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.github img {
+  max-width: 30px;
+}
+
+.bottom__notice {
+  font-size: 0.7rem;
+  position: fixed;
+  bottom: 5px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: left;
+  font-family: 'Comic Sans MS';
+  color: white;
+}
+
+.bottom__notice a{
+  font-size: 0.8rem;
+  color: rgb(228, 137, 152);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-bottom: 5px;
+  font-family: "Comic Sans MS";
+  color: white;
+}
+
+.title__image img {
+  max-width: 50px;
+  max-height: 50px;
+}
+
+.title__by {
+  margin-top: 5px;
+  font-size: 0.7rem;
+}
+
+.CodeMirror {
+  height: 40vh;
+  border-radius: 5px;
+}
+
+.error-marker {
+  color: black;
+  width: 10px !important;
+  background-color: #ff0000;
+}
+
+.error-marker .error-message {
+  display: none;
+  position: absolute;
+  background-color: #ddd;
+  border: 1px solid #999;
+  padding: 6px;
+  width: 140px;
+  left: 15px;
+  top: -1em;
+}
+
+.error-marker:hover .error-message {
+  display: block;
+}
+
+
+.status {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0;
+  color: white;
+  font-family: "Comic Sans MS";
+}
+
+.bottom {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.bottom__error {
+  color: white;
+  width: 46%;
+  min-width: 46%;
+  margin: 0 2%;
+}
+
+.bottom__warnings {
+  width: 46%;
+  margin: 0 2%;
+}
+
+.bottom__warning-item {
+  margin-top: 10px;
+  color: white;
+  padding: 10px;
+  border: 2px solid gold;
+}
+
+.bold-and-yellow {
+  font-weight: bold;
+  color: goldenrod;
+}
+
+.bold-and-red {
+  color: rgb(152, 37, 37);
+  font-weight: bold;
+}
