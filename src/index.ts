@@ -16,7 +16,8 @@ globalThis.validator = function (schema) {
       _.keysEqualPropertyNames,
       _.noNestedInNested,
       _.noMultiInMulti,
-      _.isolated
+      _.isolated,
+      _.noIsLocalizableFound
     );
     result.success = true;
   } catch (error) {

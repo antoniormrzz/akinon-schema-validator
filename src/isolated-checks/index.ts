@@ -7,6 +7,7 @@ import multi from './multi';
 import required from './required';
 import schema from './schema';
 import value from './value';
+import is_localizable from './is_localizable';
 
 import PayloadGeneratorFactory from '../utils/payload-generator';
 
@@ -23,6 +24,7 @@ let tests = {
   required,
   schema,
   value,
+  is_localizable
 };
 
 let runIsolatedChecksOnEndPoints = (baseObj, directKeys, allKeys, entries) => {

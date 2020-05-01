@@ -7,7 +7,8 @@ let warnIfTrue = (payload: requiredPayload) => {
   if (payload.value === true) {
     WarningProvider.getInstance().addWarning({
       jessyString: payload.jessyString,
-      message: 'required defaults to true, no need to set it manually.'
+      message: 'required defaults to true, no need to set it manually.',
+      type: 'others'
     });
   }
   return payload;

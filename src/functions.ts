@@ -1,13 +1,14 @@
 import {
   EssentialProperties,
   AcceptableProperties,
-  AcceptableTypes,
+  AcceptableTypes
 } from './enums';
 import keys from 'all-object-keys';
 import jessy from 'jessy';
 import isolatedChecks from './isolated-checks';
 import { CheckError } from './types/error';
 import { SpellCheckProvider } from './services/spellcheck-provider';
+import { WarningProvider } from './services/warning-provider';
 
 export let check = (...data) => {
   if (data.length === 1) {
@@ -212,7 +213,7 @@ let MainCheckFactory = (baseObj) => {
     // },
     noNestedInNested: () => {
       for (const iterator of allKeys) {
-        if (iterator.split(/\.schema\b/).length > 2)  {
+        if (iterator.split(/\.schema\b/).length > 2) {
           throw new CheckError(
             'There can be only one level of nesting via Schema!',
             iterator,
@@ -230,14 +231,10 @@ let MainCheckFactory = (baseObj) => {
       for (const iterator of multiArray) {
         let disected = iterator.split('.');
         if (disected.length > 2) {
-          let jessyString =disected.slice(0, disected.length - 3).join('.');
-          if (
-            jessy(jessyString, baseObj)[
-              'multi'
-            ]
-          ) {
+          let jessyString = disected.slice(0, disected.length - 3).join('.');
+          if (jessy(jessyString, baseObj)['multi']) {
             throw new CheckError(
-              'Multi objects can\'t have nested multi objects in them!',
+              "Multi objects can't have nested multi objects in them!",
               jessyString,
               '{ multi: true }',
               'no nested multi in multi'
@@ -254,6 +251,25 @@ let MainCheckFactory = (baseObj) => {
         throw error;
       }
     },
+    noIsLocalizableFound: () => {
+      const reducer = (accumulator, currentValue) => {
+        return currentValue.match(/\.([^\.]*)$/)[1] === 'is_localizable' &&
+          jessy(currentValue, baseObj)
+          ? accumulator + 1
+          : accumulator;
+      };
+      let is_localizableCount = allKeys.reduce(reducer, 0);
+      console.log(is_localizableCount);
+
+      if (is_localizableCount === 0) {
+        WarningProvider.getInstance().addWarning({
+          jessyString: 'all of schema',
+          message:
+            'found no is_localizable with a value of true, it is recommended to add is_localizable to your production widgets.',
+          type: 'no_is_localizable'
+        });
+      }
+    }
   };
 };
 

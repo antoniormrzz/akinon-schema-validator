@@ -12,7 +12,8 @@ export const AcceptableTypes = {
   multi: 'boolean',
   value: 'string',
   schema: 'object',
-  choices: 'array'
+  choices: 'array',
+  is_localizable: 'boolean'
 };
 
 export const EssentialProperties = ['data_type', 'key', 'label'];
@@ -26,5 +27,6 @@ export const AcceptableProperties = [
   'multi',
   'value',
   'schema',
-  'choices'
+  'choices',
+  'is_localizable'
 ];

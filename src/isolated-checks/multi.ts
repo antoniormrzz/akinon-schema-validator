@@ -7,7 +7,8 @@ let warnIfFalse = (payload: multiPayload) => {
   if (payload.value === false) {
     WarningProvider.getInstance().addWarning({
       jessyString: payload.jessyString,
-      message: 'multi defaults to false, no need to set it manually.'
+      message: 'multi defaults to false, no need to set it manually.',
+      type: 'others'
     });
   }
   return payload;

@@ -67,3 +67,12 @@ function makeMarker(msg) {
 
   return marker;
 }
+
+function copyer() {
+  var tempInput = document.createElement("textarea");
+  tempInput.value = ',\r\n\t"is_localizable": true';
+  document.body.appendChild(tempInput);
+  tempInput.select();
+  document.execCommand("copy");
+  document.body.removeChild(tempInput);
+}

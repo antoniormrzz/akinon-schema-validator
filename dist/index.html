@@ -1,67 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Akinon Schema Validator</title>
-    <link rel="stylesheet" href="codemirror.css" />
-    <link rel="stylesheet" href="tomorrow-night-eighties.css" />
-    <script type="text/javascript" src="codemirror.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
-    <script src="javascript.js"></script>
-    <script
-      type="text/javascript"
-      src="https://cdnjs.cloudflare.com/ajax/libs/jshint/2.11.0/jshint.js"
-    ></script>
-    <script src="bundle.js"></script>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
 
-  <body>
-    <div class="github">
-      <a href="https://github.com/antoniormrzz/akinon-schema-validator"><img src="github.png" alt=""></a>
-    </div>
-    <div class="title">
-      <div class="title__image">
-        <img src="cat.gif" />
-      </div>
-      <div>Akinon Widget Schema Validator</div>
-      <div class="title__by">By Antonio Ramirez</div>
-    </div>
+<head>
+  <title>Akinon Schema Validator</title>
+  <link rel="stylesheet" href="codemirror.css" />
+  <link rel="stylesheet" href="tomorrow-night-eighties.css" />
+  <script type="text/javascript" src="codemirror.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
+  <script src="javascript.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jshint/2.11.0/jshint.js"></script>
+  <script src="bundle.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
 
-    <div id="app">
-      <div>
-        <div ref="codemirror"></div>
-        <div class="status">{{ status }}</div>
-        <div class="bottom">
-          <div class="bottom__error">
-            <div v-if="error.message">
-              <p><span class="bold-and-red">error: </span>{{ error.message }}</p>
-              <p>
-                <span class="bold-and-red">where: </span>{{ error.jessyString }}
-              </p>
-              <p><span class="bold-and-red">found: </span>{{ error.found }}</p>
-              <p>
-                <span class="bold-and-red">expected: </span>{{ error.expected }}
-              </p>
-            </div>
+<body>
+  <div class="github">
+    <a href="https://github.com/antoniormrzz/akinon-schema-validator"><img src="github.png" alt=""></a>
+  </div>
+  <div class="title">
+    <div class="title__image">
+      <img src="cat.gif" />
+    </div>
+    <div>Akinon Widget Schema Validator</div>
+    <div class="title__by">By Antonio Ramirez</div>
+  </div>
+
+  <div id="app">
+    <div>
+      <div ref="codemirror"></div>
+      <div class="status">{{ status }}</div>
+      <div class="bottom">
+        <div class="bottom__error">
+          <div v-if="error.message">
+            <p><span class="bold-and-red">error: </span>{{ error.message }}</p>
+            <p>
+              <span class="bold-and-red">where: </span>{{ error.jessyString }}
+            </p>
+            <p><span class="bold-and-red">found: </span>{{ error.found }}</p>
+            <p>
+              <span class="bold-and-red">expected: </span>{{ error.expected }}
+            </p>
           </div>
-          <div class="bottom__warnings">
-            <div
-              v-for="(item,index) in warnings"
-              :key="index"
-              class="bottom__warning-item"
-            >
-              <p>
-                <span class="bold-and-yellow">where: </span>{{item.jessyString}}
-              </p>
-              <p>
-                <span class="bold-and-yellow">message: </span>{{item.message}}
-              </p>
-            </div>
+        </div>
+        <div class="bottom__warnings">
+          <div v-for="(item,index) in warnings" :key="index" class="bottom__warning-item">
+            <p>
+              <span class="bold-and-yellow">where: </span>{{item.jessyString}}
+            </p>
+            <p>
+              <span class="bold-and-yellow">message: </span>{{item.message}}
+              <br  v-if="item.type==='no_is_localizable'"  />
+              <br  v-if="item.type==='no_is_localizable'"  />
+              <button v-if="item.type==='no_is_localizable'" onclick="copyer()">copy</button>
+            </p>
           </div>
         </div>
       </div>
     </div>
-    <div class="bottom__notice"> this project heavily uses&nbsp;<a href="https://github.com/mattdiamond/fuckitjs"> fuckit.js™ </a>&nbsp;and&nbsp;<a href="https://thanosjs.org"> thanos.js™ </a>&nbsp;libraries.</div>
-    <script src="script.js"></script>
-  </body>
+  </div>
+  <div class="bottom__notice"> this project heavily uses&nbsp;<a href="https://github.com/mattdiamond/fuckitjs">
+      fuckit.js™ </a>&nbsp;and&nbsp;<a href="https://thanosjs.org"> thanos.js™ </a>&nbsp;libraries.</div>
+  <script src="script.js"></script>
+</body>
+
 </html>
